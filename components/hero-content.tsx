@@ -2,16 +2,16 @@
 
 export default function HeroContent() {
   return (
-    <div className="text-center my-0 p-0 px-0 py-16 rounded-4xl shadow-none bg-background/85 backdrop-blur-sm">
-      <div className="flex justify-center">
+    <div className="text-center my-0 p-0 px-0 py-16 rounded-4xl shadow-none bg-background/85 backdrop-blur-sm border-border border-none border-0">
+      <div className="flex items-center justify-center flex-col text-center py-4">
         <div
-          className="inline-flex items-center px-3 py-1 rounded-full bg-muted/50 backdrop-blur-sm mb-6 relative border border-border/50"
+          className="inline-flex items-center px-3 py-1 rounded-full bg-muted/50 backdrop-blur-sm relative border mb-0 border-border"
           style={{
             filter: "url(#glass-effect)",
           }}
         >
           <div className="absolute top-0 left-1 right-1 h-px bg-gradient-to-r from-transparent via-foreground/20 to-transparent rounded-full" />
-          <span className="text-muted-foreground text-sm relative z-10 font-thin">
+          <span className="text-muted-foreground text-xs md:text-sm relative z-10 font-light">
             {" "}
             Open-Source AI-Native Music Studio
           </span>
@@ -27,7 +27,7 @@ export default function HeroContent() {
         <span className="font-light text-foreground tracking-tight">Music Studio</span>
       </h1>
 
-      <p className="font-light text-muted-foreground mb-8 leading-relaxed max-w-xl mx-auto font-mono tracking-tight text-base text-balance">
+      <p className="font-light text-muted-foreground mb-8 leading-relaxed max-w-xl mx-auto font-mono tracking-tight text-balance text-xs md:text-sm">
         Turn ideas to music in seconds. The AI-Native Music Studio that transforms your creative vision into
         professional tracks.
       </p>
