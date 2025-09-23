@@ -75,7 +75,7 @@ export function FeatureSection({
 
             {metric && (
               <div className="text-center md:text-right">
-                <div className="relative inline-block p-6 rounded-xl border border-border/30 bg-neutral-800">
+                <div className="relative inline-block p-6 rounded-xl border border-border/30 bg-muted">
                   <GlowingEffect
                     spread={40}
                     glow={true}
