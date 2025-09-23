@@ -11,8 +11,8 @@ export function HeroSection() {
   const ref = useRef(null)
 
   return (
-    <section className="min-h-screen relative flex items-center justify-center p-4 md:p-8 bg-black" ref={ref}>
-      <div className="relative w-full min-h-[80vh] md:w-[85vw] md:h-[75vh] md:max-w-5xl md:rounded-2xl md:border md:border-white/10 overflow-hidden flex items-center justify-center">
+    <section className="min-h-screen relative flex items-center justify-center p-4 md:p-8 bg-background" ref={ref}>
+      <div className="relative w-full min-h-[80vh] md:w-[85vw] md:h-[75vh] md:max-w-5xl md:rounded-2xl md:border md:border-border overflow-hidden flex items-center justify-center">
         <VercelShaderBackground />
 
         <motion.div
