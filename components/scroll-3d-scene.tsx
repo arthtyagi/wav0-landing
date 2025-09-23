@@ -129,64 +129,100 @@ const HieroglyphicSymbol = ({
   )
 }
 
-const IndustrialBlock = ({
+const IndustrialGrid = ({
   position,
   scrollProgress,
   index,
-  blockType,
 }: {
   position: [number, number, number]
   scrollProgress: number
   index: number
-  blockType: "cube" | "cylinder" | "octahedron"
 }) => {
-  const ref = useRef<THREE.Mesh>(null)
+  const ref = useRef<THREE.Group>(null)
   const { theme } = useTheme()
   const safeTheme = theme || "dark"
 
-  const getBlockColor = () => {
+  const getGridColor = () => {
+    if (index % 5 === 0) return INDUSTRIAL_COLORS.accent_blue
     if (index % 7 === 0) return INDUSTRIAL_COLORS.accent_red
-    if (index % 11 === 0) return INDUSTRIAL_COLORS.accent_blue
-    if (index % 13 === 0) return INDUSTRIAL_COLORS.accent_green
-    return safeTheme === "dark" ? "#F0FFFF" : "#4A6FA5"
+    return safeTheme === "dark" ? INDUSTRIAL_COLORS.steel : INDUSTRIAL_COLORS.gunmetal
   }
 
   useFrame((state) => {
     if (ref.current) {
       const time = state.clock.elapsedTime
-      const explosionForce = scrollProgress * 1.5
 
-      const angle = index * 0.618 * Math.PI * 2
-      const distance = 0.6 + explosionForce
-      ref.current.position.x = position[0] + Math.cos(angle) * distance
-      ref.current.position.z = position[2] + Math.sin(angle) * distance
-      ref.current.position.y = position[1] + Math.sin(time + index) * explosionForce * 0.1
+      const floatOffset = Math.sin(time * 0.5 + index * 0.3) * 0.1
+      ref.current.position.y = position[1] + floatOffset
 
-      ref.current.rotation.x = time * 0.3 + scrollProgress * 1
-      ref.current.rotation.y = time * 0.2 + index * 0.1
-      ref.current.rotation.z = time * 0.1 + scrollProgress * 0.8
+      // Gentle rotation instead of wild spinning
+      ref.current.rotation.y = time * 0.1 + index * 0.2
+      ref.current.rotation.x = Math.sin(time * 0.3 + index) * 0.1
 
-      const scale = 1 + scrollProgress * 0.5
-      ref.current.scale.setScalar(scale)
+      // Subtle scale breathing
+      const breathe = 1 + Math.sin(time * 0.8 + index) * 0.05
+      ref.current.scale.setScalar(breathe)
     }
   })
 
-  const getGeometry = () => {
-    switch (blockType) {
-      case "cube":
-        return <boxGeometry args={[0.6, 0.6, 0.6]} />
-      case "cylinder":
-        return <cylinderGeometry args={[0.3, 0.3, 0.8, 8]} />
-      default:
-        return <octahedronGeometry args={[0.4, 0]} />
-    }
-  }
-
   return (
-    <mesh ref={ref} position={position}>
-      {getGeometry()}
-      <meshBasicMaterial color={getBlockColor()} transparent opacity={0.95} />
-    </mesh>
+    <group ref={ref} position={position}>
+      {/* Main grid frame */}
+      <mesh>
+        <boxGeometry args={[1.2, 0.05, 1.2]} />
+        <meshBasicMaterial color={getGridColor()} transparent opacity={0.8} />
+      </mesh>
+      <mesh>
+        <boxGeometry args={[0.05, 1.2, 1.2]} />
+        <meshBasicMaterial color={getGridColor()} transparent opacity={0.8} />
+      </mesh>
+      <mesh>
+        <boxGeometry args={[1.2, 1.2, 0.05]} />
+        <meshBasicMaterial color={getGridColor()} transparent opacity={0.8} />
+      </mesh>
+
+      {/* Grid lines */}
+      {Array.from({ length: 5 }, (_, i) => {
+        const offset = (i - 2) * 0.3
+        return (
+          <group key={i}>
+            <mesh position={[offset, 0, 0]}>
+              <boxGeometry args={[0.02, 1.2, 0.02]} />
+              <meshBasicMaterial color={getGridColor()} transparent opacity={0.6} />
+            </mesh>
+            <mesh position={[0, offset, 0]}>
+              <boxGeometry args={[1.2, 0.02, 0.02]} />
+              <meshBasicMaterial color={getGridColor()} transparent opacity={0.6} />
+            </mesh>
+            <mesh position={[0, 0, offset]}>
+              <boxGeometry args={[0.02, 0.02, 1.2]} />
+              <meshBasicMaterial color={getGridColor()} transparent opacity={0.6} />
+            </mesh>
+          </group>
+        )
+      })}
+
+      {/* Corner nodes */}
+      {[
+        [-0.6, -0.6, -0.6],
+        [0.6, -0.6, -0.6],
+        [-0.6, 0.6, -0.6],
+        [0.6, 0.6, -0.6],
+        [-0.6, -0.6, 0.6],
+        [0.6, -0.6, 0.6],
+        [-0.6, 0.6, 0.6],
+        [0.6, 0.6, 0.6],
+      ].map((pos, nodeIndex) => (
+        <mesh key={nodeIndex} position={pos as [number, number, number]}>
+          <sphereGeometry args={[0.04, 8, 8]} />
+          <meshBasicMaterial
+            color={nodeIndex % 2 === 0 ? INDUSTRIAL_COLORS.accent_green : getGridColor()}
+            transparent
+            opacity={0.9}
+          />
+        </mesh>
+      ))}
+    </group>
   )
 }
 
@@ -199,56 +235,53 @@ const IndustrialCore = ({ scrollProgress }: { scrollProgress: number }) => {
     if (ref.current) {
       const time = state.clock.elapsedTime
 
-      ref.current.rotation.x = time * 0.1 + scrollProgress * 0.8
-      ref.current.rotation.y = time * 0.2 + scrollProgress * 1
-      ref.current.rotation.z = time * 0.05 + scrollProgress * 0.5
+      ref.current.rotation.y = time * 0.05
+      ref.current.rotation.x = Math.sin(time * 0.2) * 0.1
 
-      const pulse = 1 + Math.sin(time * 2) * 0.1
-      const scrollScale = 1 + scrollProgress * 0.8
-      ref.current.scale.setScalar(pulse * scrollScale)
+      // Gentle breathing instead of wild pulsing
+      const pulse = 1 + Math.sin(time * 0.8) * 0.05
+      ref.current.scale.setScalar(pulse)
     }
   })
 
   const coreElements = useMemo(() => {
     const elements = []
-    for (let i = 0; i < 16; i++) {
-      const angle = (i / 16) * Math.PI * 2
-      const radius = 1.8
+
+    // Create a central grid structure
+    for (let i = 0; i < 8; i++) {
+      const angle = (i / 8) * Math.PI * 2
+      const radius = 1.5
       const x = Math.cos(angle) * radius
       const z = Math.sin(angle) * radius
 
       elements.push(
-        <mesh key={`outer-${i}`} position={[x, 0, z]}>
-          {i % 3 === 0 ? <boxGeometry args={[0.6, 0.6, 0.6]} /> : <tetrahedronGeometry args={[0.7, 0]} />}
+        <mesh key={`frame-${i}`} position={[x, 0, z]}>
+          <boxGeometry args={[0.8, 0.05, 0.05]} />
           <meshBasicMaterial
-            color={
-              i % 4 === 0
-                ? INDUSTRIAL_COLORS.accent_blue
-                : safeTheme === "dark"
-                  ? "#FFFFFF"
-                  : INDUSTRIAL_COLORS.gunmetal
-            }
+            color={safeTheme === "dark" ? INDUSTRIAL_COLORS.steel : INDUSTRIAL_COLORS.gunmetal}
             transparent
-            opacity={0.98}
+            opacity={0.7}
           />
         </mesh>,
       )
 
+      // Connecting beams
       if (i % 2 === 0) {
-        const innerX = Math.cos(angle + Math.PI / 6) * 1.0
-        const innerZ = Math.sin(angle + Math.PI / 6) * 1.0
+        const nextAngle = ((i + 2) / 8) * Math.PI * 2
+        const nextX = Math.cos(nextAngle) * radius
+        const nextZ = Math.sin(nextAngle) * radius
+        const midX = (x + nextX) / 2
+        const midZ = (z + nextZ) / 2
+
         elements.push(
-          <mesh key={`inner-${i}`} position={[innerX, 0, innerZ]}>
-            <cylinderGeometry args={[0.2, 0.2, 0.8, 6]} />
-            <meshBasicMaterial
-              color={i % 6 === 0 ? INDUSTRIAL_COLORS.accent_red : "#F0FFFF"}
-              transparent
-              opacity={0.95}
-            />
+          <mesh key={`beam-${i}`} position={[midX, 0, midZ]} rotation={[0, angle + Math.PI / 4, 0]}>
+            <boxGeometry args={[1.2, 0.03, 0.03]} />
+            <meshBasicMaterial color={INDUSTRIAL_COLORS.accent_blue} transparent opacity={0.8} />
           </mesh>,
         )
       }
     }
+
     return elements
   }, [safeTheme])
 
@@ -297,55 +330,6 @@ const CrystalShard = ({
   )
 }
 
-const MorphingCore = ({ scrollProgress }: { scrollProgress: number }) => {
-  const ref = useRef<THREE.Group>(null)
-  const { theme } = useTheme()
-  const safeTheme = theme || "dark"
-
-  useFrame((state) => {
-    if (ref.current) {
-      const time = state.clock.elapsedTime
-
-      ref.current.rotation.x = time * 0.1 + scrollProgress * 0.6
-      ref.current.rotation.y = time * 0.15 + scrollProgress * 0.8
-      ref.current.rotation.z = time * 0.05 + scrollProgress * 0.4
-
-      const breathe = 1 + Math.sin(time * 2) * 0.1
-      const scrollScale = 1 + scrollProgress * 0.8
-      ref.current.scale.setScalar(breathe * scrollScale)
-    }
-  })
-
-  const coreElements = useMemo(() => {
-    const elements = []
-    for (let i = 0; i < 8; i++) {
-      const angle = (i / 8) * Math.PI * 2
-      const radius = 1.2
-      const x = Math.cos(angle) * radius
-      const z = Math.sin(angle) * radius
-
-      elements.push(
-        <mesh key={`outer-${i}`} position={[x, 0, z]}>
-          <tetrahedronGeometry args={[0.6, 0]} />
-          <meshBasicMaterial color={safeTheme === "dark" ? "#FFFFFF" : "#000000"} transparent opacity={0.9} wireframe />
-        </mesh>,
-      )
-
-      const innerX = Math.cos(angle + Math.PI / 8) * 0.6
-      const innerZ = Math.sin(angle + Math.PI / 8) * 0.6
-      elements.push(
-        <mesh key={`inner-${i}`} position={[innerX, 0, innerZ]}>
-          <dodecahedronGeometry args={[0.3, 0]} />
-          <meshBasicMaterial color={safeTheme === "dark" ? "#FFFFFF" : "#000000"} transparent opacity={0.8} />
-        </mesh>,
-      )
-    }
-    return elements
-  }, [safeTheme])
-
-  return <group ref={ref}>{coreElements}</group>
-}
-
 const TribalTotem = ({
   position,
   scrollProgress,
@@ -372,14 +356,14 @@ const TribalTotem = ({
       const distance = 1 + explosionForce
       ref.current.position.x = position[0] + Math.cos(angle) * distance
       ref.current.position.z = position[2] + Math.sin(angle) * distance
-      ref.current.position.y = position[1] + Math.sin(time * 1 + index) * explosionForce * 0.2
+      ref.current.position.y = position[1] + Math.cos(time * 1 + index) * explosionForce * 0.15
 
-      ref.current.rotation.x = time * 0.3 + scrollProgress * 1.5
-      ref.current.rotation.y = time * 0.4 + index * 0.2
-      ref.current.rotation.z = time * 0.1 + scrollProgress * 0.8
+      ref.current.rotation.x = time * 0.15 + scrollProgress * 0.6
+      ref.current.rotation.y = time * 0.5 + index * 0.15
+      ref.current.rotation.z = time * 0.2 + scrollProgress * 1
 
-      const breathe = 1 + Math.sin(time * 2 + index) * 0.1
-      const scale = 1 + scrollProgress * 0.8 + breathe * 0.1
+      const pulse = 1 + Math.sin(time * 3 + index) * 0.15
+      const scale = 1.2 + scrollProgress * 1 + pulse * 0.1
       ref.current.scale.setScalar(scale)
     }
   })
@@ -438,65 +422,6 @@ const PsychedelicMandala = ({
 
       const angle = index * 0.618 * Math.PI * 2
       const distance = 1.5 + explosionForce
-      ref.current.position.x = position[0] + Math.cos(angle) * distance
-      ref.current.position.z = position[2] + Math.sin(angle) * distance
-      ref.current.position.y = position[1] + Math.cos(time * 1 + index) * explosionForce * 0.15
-
-      ref.current.rotation.x = time * 0.15 + scrollProgress * 0.6
-      ref.current.rotation.y = time * 0.5 + index * 0.15
-      ref.current.rotation.z = time * 0.2 + scrollProgress * 1
-
-      const pulse = 1 + Math.sin(time * 3 + index) * 0.15
-      const scale = 1.2 + scrollProgress * 1 + pulse * 0.1
-      ref.current.scale.setScalar(scale)
-    }
-  })
-
-  return (
-    <group ref={ref} position={position}>
-      {Array.from({ length: 12 }, (_, layerIndex) => {
-        const layerAngle = (layerIndex / 12) * Math.PI * 2
-        const layerRadius = 0.8 + layerIndex * 0.1
-        const layerX = Math.cos(layerAngle) * layerRadius
-        const layerZ = Math.sin(layerAngle) * layerRadius
-        return (
-          <mesh key={layerIndex} position={[layerX, 0, layerZ]}>
-            <dodecahedronGeometry args={[0.2, 0]} />
-            <meshBasicMaterial
-              color={Object.values(PSYCHEDELIC_COLORS)[layerIndex % 8]}
-              transparent
-              opacity={0.9}
-              wireframe={layerIndex % 2 === 0}
-            />
-          </mesh>
-        )
-      })}
-      <mesh>
-        <icosahedronGeometry args={[0.6, 1]} />
-        <meshBasicMaterial color={PSYCHEDELIC_COLORS.cosmic_purple} transparent opacity={0.95} wireframe />
-      </mesh>
-    </group>
-  )
-}
-
-const FractalCrystal = ({
-  position,
-  scrollProgress,
-  index,
-}: {
-  position: [number, number, number]
-  scrollProgress: number
-  index: number
-}) => {
-  const ref = useRef<THREE.Group>(null)
-
-  useFrame((state) => {
-    if (ref.current) {
-      const time = state.clock.elapsedTime
-      const explosionForce = scrollProgress * 5
-
-      const angle = index * 0.618 * Math.PI * 2
-      const distance = 2 + explosionForce
       ref.current.position.x = position[0] + Math.cos(angle) * distance
       ref.current.position.z = position[2] + Math.sin(angle) * distance
       ref.current.position.y = position[1] + Math.sin(time * 0.8 + index) * explosionForce * 0.3
@@ -575,41 +500,39 @@ function Scene() {
     camera.lookAt(0, 0, 0)
   })
 
-  const industrialBlocks = useMemo(() => {
-    const blocks = []
+  const industrialGrids = useMemo(() => {
+    const grids = []
     const positions = [
-      [-3, 0, -3],
-      [3, 0, -3],
-      [-3, 0, 3],
-      [3, 0, 3],
-      [0, 2, -2],
-      [0, -2, 2],
+      [-4, 0, -4],
+      [4, 0, -4],
+      [-4, 0, 4],
+      [4, 0, 4],
+      [0, 3, -3],
+      [0, -3, 3],
+      [-6, 1, 0],
+      [6, -1, 0],
     ]
 
-    const blockTypes: ("cube" | "cylinder" | "octahedron")[] = ["cube", "cylinder", "octahedron"]
-
     positions.forEach((pos, index) => {
-      blocks.push(
-        <IndustrialBlock
+      grids.push(
+        <IndustrialGrid
           key={index}
           position={pos as [number, number, number]}
           scrollProgress={scrollProgress}
           index={index}
-          blockType={blockTypes[index % 3]}
         />,
       )
     })
-    return blocks
+    return grids
   }, [scrollProgress])
 
   const hieroglyphicSymbols = useMemo(() => {
     const symbols = []
     const symbolPositions = [
-      [-6, 1, -4],
-      [6, -1, -4],
-      [-4, 2, 6],
-      [4, -2, 6],
-      [0, 3, -8],
+      [-8, 2, -6],
+      [8, -2, -6],
+      [-6, 3, 8],
+      [6, -3, 8],
     ]
     const symbolTypes: ("ankh" | "eye" | "pyramid" | "spiral")[] = ["ankh", "eye", "pyramid", "spiral"]
 
@@ -630,20 +553,14 @@ function Scene() {
   return (
     <>
       <IndustrialCore scrollProgress={scrollProgress} />
-      {industrialBlocks}
+      {industrialGrids}
       {hieroglyphicSymbols}
-      <CrystalShard scrollProgress={scrollProgress} index={0} position={[0, 0, 0]} />
-      <TribalTotem scrollProgress={scrollProgress} index={0} position={[0, 0, 0]} />
-      <PsychedelicMandala scrollProgress={scrollProgress} index={0} position={[0, 0, 0]} />
-      <FractalCrystal scrollProgress={scrollProgress} index={0} position={[0, 0, 0]} />
-      <ambientLight intensity={3.5} />
-      <pointLight position={[10, 10, 10]} intensity={5.5} color="#40FFFF" />
-      <pointLight position={[-10, -10, -10]} intensity={5.5} color="#FF40A0" />
-      <pointLight position={[0, 15, 0]} intensity={4.0} color="#FFFFFF" />
-      <pointLight position={[0, -15, 0]} intensity={4.0} color="#40FFA8" />
-      <pointLight position={[15, 0, 0]} intensity={3.5} color="#FF8640" />
-      <pointLight position={[-15, 0, 0]} intensity={3.5} color="#CA40FF" />
-      <hemisphereLight skyColor="#FFFFFF" groundColor="#40FFFF" intensity={2.5} />
+      <ambientLight intensity={2.5} />
+      <pointLight position={[10, 10, 10]} intensity={3.5} color="#40FFFF" />
+      <pointLight position={[-10, -10, -10]} intensity={3.5} color="#FF40A0" />
+      <pointLight position={[0, 15, 0]} intensity={3.0} color="#FFFFFF" />
+      <pointLight position={[0, -15, 0]} intensity={3.0} color="#40FFA8" />
+      <hemisphereLight skyColor="#FFFFFF" groundColor="#40FFFF" intensity={1.5} />
     </>
   )
 }
