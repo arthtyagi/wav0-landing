@@ -24,29 +24,31 @@ export const HeatmapShaderBackground = () => {
   }, [])
 
   if (!isClient) {
-    return <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-neutral-900 to-black" />
+    return <div className="absolute inset-0 w-full h-full bg-muted" />
   }
 
   return (
-    <div className="absolute inset-0 w-full h-full flex items-center justify-center overflow-hidden">
-      <div className="w-full h-full [&>canvas]:w-full [&>canvas]:h-full [&>canvas]:object-cover">
-        <Heatmap
-          width={dimensions.width}
-          height={dimensions.height}
-          image="/logo-wav0.svg"
-          colors={["#8c8c8c", "#ffffff", "#3265e7", "#6bd8ff", "#ffe77a"]}
-          colorBack="#000000"
-          contour={0.5}
-          angle={0}
-          noise={0.75}
-          innerGlow={0.5}
-          outerGlow={0.5}
-          speed={0.5}
-          scale={0.75}
-          rotation={0}
-          offsetX={0}
-          offsetY={0}
-        />
+    <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-muted">
+      <div className="relative w-full h-full flex items-center justify-center">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Heatmap
+            width={dimensions.width}
+            height={dimensions.height}
+            image="/logo-wav0.svg"
+            colors={["#8c8c8c", "#ffffff", "#3265e7", "#6bd8ff", "#ffe77a"]}
+            colorBack="#000000"
+            contour={0.5}
+            angle={0}
+            noise={0.75}
+            innerGlow={0.5}
+            outerGlow={0.5}
+            speed={0.5}
+            scale={1.5}
+            rotation={0}
+            offsetX={0}
+            offsetY={0}
+          />
+        </div>
       </div>
     </div>
   )

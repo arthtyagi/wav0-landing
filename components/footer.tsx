@@ -1,11 +1,19 @@
 "use client"
 
+import { WaterShaderBackground } from "@/components/ui/water-shader-background"
+
 export function Footer() {
   return (
-    <footer className="relative bg-muted/50 border-t border-border">
-      <div className="max-w-7xl mx-auto px-6 py-16 text-center">
+    <footer className="relative border-t border-border overflow-hidden">
+      <div className="absolute inset-0 opacity-20">
+        <WaterShaderBackground />
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 py-16 text-center relative z-10">
         <div className="text-center mb-12">
-          <h2 className="text-8xl select-none md:text-9xl font-mono tracking-[-0.1em] text-muted-foreground font-light">WAV_0</h2>
+          <h2 className="text-8xl select-none md:text-9xl font-mono tracking-[-0.1em] text-muted-foreground font-light">
+            WAV_0
+          </h2>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12 text-sm">

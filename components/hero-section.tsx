@@ -11,22 +11,22 @@ export function HeroSection() {
   const ref = useRef(null)
 
   return (
-    <section className="min-h-screen relative flex items-center justify-center p-4 md:p-8 bg-background" ref={ref}>
-      <div className="relative w-full min-h-[80vh] md:w-[85vw] md:h-[75vh] md:max-w-5xl md:rounded-2xl md:border md:border-border overflow-hidden flex items-center justify-center">
+    <section className="min-h-screen relative flex items-center justify-center p-6 md:p-12 bg-background" ref={ref}>
+      <div className="relative w-full min-h-[85vh] md:w-[90vw] md:h-[80vh] md:max-w-6xl md:rounded-3xl md:border md:border-border overflow-hidden flex items-center justify-center">
         <HeatmapShaderBackground />
 
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
-          className="px-8 md:px-16 w-full max-w-4xl relative z-20 flex items-center justify-center min-h-full"
+          transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] }}
+          className="px-8 md:px-20 w-full max-w-5xl relative z-20 flex items-center justify-center min-h-full"
         >
           <div className="w-full">
             <HeroContent />
           </div>
         </motion.div>
 
-        <div className="absolute top-4 left-4 md:top-6 md:left-6 z-40">
+        <div className="absolute top-6 left-6 md:top-8 md:left-8 z-40">
           <ThemeToggle />
         </div>
       </div>
