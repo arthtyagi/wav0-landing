@@ -3,7 +3,7 @@
 import { motion } from "framer-motion"
 import { useRef } from "react"
 import { ThemeToggle } from "./theme-toggle"
-import { HeatmapShaderBackground } from "./ui/heatmap-shader-background"
+import { WaterShaderBackground } from "./ui/water-shader-background"
 import HeroContent from "./hero-content"
 import PulsingCircle from "./pulsing-circle"
 
@@ -13,7 +13,7 @@ export function HeroSection() {
   return (
     <section className="min-h-screen relative flex items-center justify-center p-6 md:p-12 bg-background" ref={ref}>
       <div className="relative w-full min-h-[85vh] md:w-[90vw] md:h-[80vh] md:max-w-6xl md:rounded-3xl md:border md:border-border overflow-hidden flex items-center justify-center">
-        <HeatmapShaderBackground />
+        <WaterShaderBackground />
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
